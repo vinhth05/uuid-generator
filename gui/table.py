@@ -138,7 +138,7 @@ class VirtualizedTable(ctk.CTkFrame):
                 
             rect_id = self.canvas.create_rectangle(
                 0, y_pos, canvas_width, y_pos + self.row_height,
-                fill=bg_color, outline="", tags=("row", f"row_{i}")
+                fill=bg_color, outline="", tags=("row", f"row_{i}", f"row_bg_{i}")
             )
             
             # Columns (simplified drawing directly on canvas for performance)
@@ -163,7 +163,7 @@ class VirtualizedTable(ctk.CTkFrame):
             self.canvas.create_text(20 + w0 + w1 + w2, y_pos + 20, text=str(len(uuid_str)), fill=sec_color, font=font, anchor="w", tags=(f"row_{i}",))
             
             # Copy Button (Text representation)
-            self.canvas.create_text(20 + w0 + w1 + w2 + w3, y_pos + 20, text="📋 Copy", fill=get_color("primary"), font=font, anchor="w", tags=("copy_btn", f"row_{i}"))
+            self.canvas.create_text(20 + w0 + w1 + w2 + w3, y_pos + 20, text="📋 Copy", fill=get_color("primary"), font=font, anchor="w", tags=("copy_btn", f"row_{i}", f"copy_text_{i}"))
             
         # 5. Bind events
         self.canvas.tag_bind("row", "<Button-1>", self._on_row_click)
@@ -209,5 +209,23 @@ class VirtualizedTable(ctk.CTkFrame):
     def _copy_uuid(self, idx: int):
         uuid_str = self.data[idx]
         ClipboardManager.copy_to_clipboard(uuid_str)
+        
+        # Visual feedback on the row
+        self.canvas.itemconfigure(f"copy_text_{idx}", text="✓ Copied!", fill=get_color("success"))
+        self.canvas.itemconfigure(f"row_bg_{idx}", fill=get_color("success"))
+        
+        def reset_feedback():
+            try:
+                # Reset text
+                self.canvas.itemconfigure(f"copy_text_{idx}", text="📋 Copy", fill=get_color("primary"))
+                # Reset background
+                bg = get_color("card") if idx % 2 == 0 else get_color("bg")
+                if idx == self.selected_index: bg = get_color("hover")
+                self.canvas.itemconfigure(f"row_bg_{idx}", fill=bg)
+            except tk.TclError:
+                pass
+                
+        self.after(500, reset_feedback)
+        
         if self.on_copy_callback:
             self.on_copy_callback("Copied to clipboard")
