@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+logs/
+history/history.json
+exports/
+dist/
+build/
+*.spec

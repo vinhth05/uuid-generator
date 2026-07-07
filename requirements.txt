@@ -1,0 +1,4 @@
+customtkinter>=5.2.2
+pyperclip>=1.8.2
+pytest>=8.0.0
+pyinstaller>=6.4.0
